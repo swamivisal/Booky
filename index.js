@@ -7,6 +7,11 @@ const database = require("./database");
 // Initialization
 const booky = express();
 
+//configuration
+booky.use(express.json());
+
+//---------------------------------------------------GET-----------------------------------------------------
+
 /*
 Route           /
 Description     Get all books
@@ -179,6 +184,157 @@ booky.get("/publications/isbn1/:isbn",(req,res) => {
   }
   return res.json({ publications: getSpecificPublication });
 });
+//----------------------------------------------------POST----------------------------------------------------------
+
+/*
+Route           /book/new
+Description     add new book
+Access          PUBLIC
+Parameter       None
+Methods         POST
+*/
+
+booky.post("/book/new",(req,res)=>{
+    const {newBook}=req.body;
+    database.books.push(newBook);
+    return res.json({books:database.books,message:"book was added"});
+});
+
+/*
+Route           /author/new
+Description     add new author
+Access          PUBLIC
+Parameter       None
+Methods         POST
+*/
+
+booky.post("/author/new",(req,res)=>{
+  const {newAuthor}=req.body;
+  database.authors.push(newAuthor);
+  return res.json({authors:database.authors});
+});
+
+/*
+Route           /publication/new
+Description     add new publication
+Access          PUBLIC
+Parameter       None
+Methods         POST
+*/
+booky.post("/publication/new",(req,res)=>{
+  const {newPublication}=req.body;
+  database.publications.push(newPublication);
+  return res.json({publications:database.publications});
+});
+
+//---------------------------------------------------PUT------------------------------------------------
+
+/*
+Route           /book/update/title
+Description     update book title
+Access          PUBLIC
+Parameter       isbn
+Methods         PUT
+*/
+booky.put("/book/update/title/:isbn",(req,res)=>{
+  database.books.forEach((book)=>{
+    if(book.ISBN==req.params.isbn){
+      book.title=req.body.bookTitle;
+      return;
+    }
+  });
+  return res.json({books:database.books,message:"book title was updated"});
+});
+
+/*
+Route           /book/author/update
+Description     update/add new author
+Access          PUBLIC
+Parameter       isbn
+Methods         PUT
+*/
+booky.put("/book/author/update/:isbn",(req,res)=>{
+  database.books.forEach((book)=>{
+    if(book.ISBN===req.params.isbn){
+      book.author.push(req.body.newAuthor);
+      return;
+    }
+  });
+  database.authors.forEach((author)=>{
+    if(author.id===req.body.newAuthor){
+      author.books.push(req.params.isbn);
+      return;
+    }
+  });
+  return res.json({
+    books:database.books,
+    authors:database.authors,
+    message:"new author was added"})
+});
+
+/*
+Route           /author/update
+Description     update name of author based on id
+Access          PUBLIC
+Parameter       id
+Methods         PUT
+*/
+booky.put("/author/update/:id",(req,res)=>{
+  database.authors.forEach((author)=>{
+    if(author.id==req.params.id){
+      author.name=req.body.newAuthor;
+      return;
+    }
+  });
+  return res.json({author:database.authors});
+});
+
+/*
+Route           /publication/update
+Description     update name of publication based on id
+Access          PUBLIC
+Parameter       id
+Methods         PUT
+*/
+booky.put("/publication/update/:id",(req,res)=>{
+  database.publications.forEach((publication)=>{
+    if(publication.id==req.params.id){
+      publication.name=req.body.newPublication;
+      return;
+    }
+  });
+  return res.json({publication:database.publications});
+});
+
+/*
+Route           /publication/book/update
+Description     update/add new publication
+Access          PUBLIC
+Parameter       id
+Methods         PUT
+*/
+booky.put("/publication/book/update/:id",(req,res)=>{
+  database.publications.forEach((publication)=>{
+    if(publication.id==req.params.id){
+      publication.books.push(req.body.newBook);
+      return;
+    }
+  });
+  database.books.forEach((book)=>{
+    if(book.ISBN===req.body.newBook){
+      book.publications.push(req.params.id);
+      return;
+    }
+  });
+  return res.json({
+    books:database.books,
+    publications:database.publications,
+    message:"new book was added to publication"})
+});
+
+//------------------------------------------------------------DELETE----------------------------------------------
+
+
 
 booky.listen(3000,()=>console.log("Hey server is running"));
 

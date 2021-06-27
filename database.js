@@ -18,9 +18,9 @@ const books=[
         numPage:285,
         publications:[1],
         category:["tech","programming","education","games"]
-        },
+        }
 
-]
+]  
 
 const authors=[
     {
@@ -32,7 +32,7 @@ const authors=[
         id:2,
         name:"swami",
         books:["1234book"]
-    },
+    }
 ];
 
 const publications=[
