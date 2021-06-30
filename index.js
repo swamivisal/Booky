@@ -1,5 +1,7 @@
+require("dotenv").config();
 //Import express
 const express = require("express");
+const mongoose = require("mongoose");
 
 //Import Database
 const database = require("./database");
@@ -10,7 +12,19 @@ const booky = express();
 //configuration
 booky.use(express.json());
 
-//---------------------------------------------------GET-----------------------------------------------------
+//Establish database connection
+mongoose.connect(
+  process.env.MONGO_URL,
+  {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true
+  }
+)
+.then(()=>console.log("connection established"));
+
+//---------------------------------------------------GET----------------------------------------------------- 
 
 /*
 Route           /
@@ -303,12 +317,12 @@ booky.put("/publication/update/:id",(req,res)=>{
       return;
     }
   });
-  return res.json({publication:database.publications});
+  return res.json({publication:database.publications,message:"publication name was updated"});
 });
 
 /*
 Route           /publication/book/update
-Description     update/add new publication
+Description     update/add new book
 Access          PUBLIC
 Parameter       id
 Methods         PUT
@@ -329,10 +343,26 @@ booky.put("/publication/book/update/:id",(req,res)=>{
   return res.json({
     books:database.books,
     publications:database.publications,
-    message:"new book was added to publication"})
+    message:"new publication was added"})
 });
 
 //------------------------------------------------------------DELETE----------------------------------------------
+
+/*
+Route           /book/delete
+Description     delete a book
+Access          PUBLIC
+Parameter       isbn
+Methods         DELETE
+*/
+booky.delete("/book/delete/:isbn",(req,res)=>{
+  const updatedBookDatabase=database.books.filter((book)=>{
+    book.ISBN!==req.params.isbn
+  })
+  database.books=updatedBookDatabase;
+  return res.json({books:database.books});
+});
+
 
 
 
